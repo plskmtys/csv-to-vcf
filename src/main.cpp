@@ -5,7 +5,16 @@
 #include <boost/algorithm/string.hpp>
 
 #define INPUT_FILE "in.csv"
-#define OUTPUT_FILE "out.vcf"
+#define OUTPUT_FILE "out_win.vcf"
+#define windows
+#define outlook
+
+
+#ifdef windows
+    #define endl "\r\n"
+#else
+    #define endl "\n"
+#endif
 
 class Contact{
 private:
@@ -18,11 +27,11 @@ public:
     }
 
     void Print(std::ostream& os) const {
-        os << "BEGIN:VCARD\nVERSION:2.1\n";
-        os << "N:" << Name << ";;;;\n";
-        os << "FN:" << Name << "\n";
-        os << "EMAIL;work:" << Address << "\n";
-        os << "END:VCARD\n";
+        os << "BEGIN:VCARD" << endl << "VERSION:2.1" << endl;
+        os << "N:" << Name << ";;;;" << endl;
+        os << "FN:" << Name << endl;
+        os << "EMAIL;work:" << Address << endl;
+        os << "END:VCARD" << endl;
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Contact& c){
@@ -69,9 +78,12 @@ std::vector<Contact> parseLine(std::string& line){
 
 int main(){
     std::string inputFileName = "files/"; inputFileName += INPUT_FILE;
-    std::string outputFileName = "files/"; outputFileName += OUTPUT_FILE;
     std::ifstream inputFile(inputFileName);
-    std::ofstream outputFile(outputFileName);
+
+    #ifndef outlook
+        std::string outputFileName = "files/"; outputFileName += OUTPUT_FILE;
+        std::ofstream outputFile(outputFileName);
+    #endif
 
     std::string line;
     std::set<Contact> contacts;
@@ -83,6 +95,12 @@ int main(){
     }
 
     for(const auto& c : contacts){
-        outputFile << c;
+        #ifdef outlook
+            std::ofstream outputFile("outlook/" + c.Name + ".vcf");
+            outputFile << c;
+            outputFile.close();
+        #else
+            outputFile << c;
+        #endif
     }
 }
